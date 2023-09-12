@@ -1,0 +1,16 @@
+{
+   "AWSEBDockerrunVersion": "1",
+   "Authentication": {
+      "Bucket": "lks-fikri-skenda", 
+      "Key": "config.json"
+   },
+   "Image": {
+      "Name": "350358346588.dkr.ecr.us-east-1.amazonaws.com/lks-order-image:latest"
+   },
+   "Ports": [
+      {
+         "ContainerPort": 8000,
+         "HostPort": 80
+      }
+   ]
+}
