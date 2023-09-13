@@ -1,7 +1,7 @@
 {
    "AWSEBDockerrunVersion": "1",
    "Authentication": {
-      "Bucket": "lks-fikri-skenda", 
+      "Bucket": "credential-for-lks", 
       "Key": "config.json"
    },
    "Image": {
@@ -9,7 +9,7 @@
    },
    "Ports": [
       {
-         "ContainerPort": 9000,
+         "ContainerPort": 8000,
          "HostPort": 80
       }
    ]
