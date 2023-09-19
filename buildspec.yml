@@ -13,7 +13,7 @@ phases:
     commands:
       - echo "Install Dependencies and login into ECR"
       - sudo yum install -y jq
-      - npm install doteenv
+      - npm install dotenv
       - npm install
       - aws s3 cp s3://credential-for-lks/config.json .
       - TOKEN=$(jq -r '.auths["350358346588.dkr.ecr.us-east-1.amazonaws.com"].auth' config.json)
