@@ -21,13 +21,13 @@ phases:
   build:
     commands:
       - echo "Run unit testing and build docker image"
-      - docker build -t $ECR_REPO:latest .
+      - docker build -t $ECR_REPO .
       - npm run test
   post_build:
     commands:
       - echo "push the image to ECR.."
-      - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
-      - docker tag $ECR_REPO:latest $ECR_REPO:latest
+      - docker tag $ECR_REPO $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
+      - docker tag $ECR_REPO $ECR_REPO:latest
       - docker push $ECR_REPO:latest
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
@@ -41,5 +41,6 @@ artifacts:
   files:
     - imagedefinitions.json
     - Dockerrun.aws.json
+    - Dockerfile
     - .env.production
     - .env.testing
