@@ -44,3 +44,4 @@ artifacts:
     - Dockerfile
     - .env.production
     - .env.testing
+    - package.json
