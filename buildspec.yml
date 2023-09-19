@@ -1,0 +1,45 @@
+version: 0.2
+env:
+  variables:
+    ECR_REPO: 350358346588.dkr.ecr.us-east-1.amazonaws.com/lks-order-image
+    ECR_REGION: us-east-1
+    CONTAINER_NAME: lks-order-container
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16
+      docker: 20
+  pre_build:
+    commands:
+      - echo "Install Dependencies and login into ECR"
+      - sudo yum install -y jq
+      - npm install doteenv
+      - npm install
+      - aws s3 cp s3://credential-for-lks/config.json .
+      - TOKEN=$(jq -r '.auths["350358346588.dkr.ecr.us-east-1.amazonaws.com"].auth' config.json)
+      - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
+  build:
+    commands:
+      - echo "Run unit testing and build docker image"
+      - docker build -t $ECR_REPO .
+      - npm run test
+  post_build:
+    commands:
+      - echo "push the image to ECR.."
+      - docker tag $ECR_REPO $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
+      - docker tag $ECR_REPO $ECR_REPO:latest
+      - docker push $ECR_REPO:latest
+      - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
+      - echo "build complete.."
+reports:
+  test-report:
+    files:
+      - 'report/test-result.xml'
+    file-format: JUNITXML
+artifacts:
+  files:
+    - imagedefinitions.json
+    - Dockerrun.aws.json
+    - .env.production
+    - .env.testing
