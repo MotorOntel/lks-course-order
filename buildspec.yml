@@ -16,7 +16,7 @@ phases:
       - sudo yum install -y jq
       - npm install dotenv
       - npm install
-      - echo "$DOCKER_PASSWORD" | docker login -u $"DOCKER_USERNAME" --password-stdin
+      - echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_USERNAME --password-stdin
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
       - ENCODED_TOKEN=$(echo -n AWS:$TOKEN | base64)
       - |
@@ -50,9 +50,6 @@ phases:
       - docker tag $ECR_REPO $ECR_REPO:latest
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - docker push $ECR_REPO:latest
-      - echo "Prepare artifacts for Elastic Beanstalk deployment"
-      - zip -r deployment.zip Dockerrun.aws.json .env.production .env.testing package.json
-      - aws s3 cp deployment.zip s3://$EB_BUCKET/deployment-${CODEBUILD_BUILD_NUMBER}.zip
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
       - echo "build complete.."
 reports:
