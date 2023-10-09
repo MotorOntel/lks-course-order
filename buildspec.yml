@@ -44,18 +44,18 @@ phases:
       - docker build -t $ECR_REPO .
       - npm run test || true
   post_build:
-  commands:
-    - echo "Run post-build commands..."
-    - echo "Tag image with build number..."
-    - docker tag $ECR_REPO $ECR_REPO:${CODEBUILD_BUILD_NUMBER}
-    - echo "Tag image with latest..."
-    - docker tag $ECR_REPO $ECR_REPO:latest
-    - echo "Pushing image with build number to ECR..."
-    - docker push $ECR_REPO:${CODEBUILD_BUILD_NUMBER}
-    - echo "Pushing image with latest tag to ECR..."
-    - docker push $ECR_REPO:latest
-    - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
-    - echo "build complete.."
+    commands:
+      - echo "Run post-build commands..."
+      - echo "Tag image with build number..."
+      - docker tag $ECR_REPO $ECR_REPO:${CODEBUILD_BUILD_NUMBER}
+      - echo "Tag image with latest..."
+      - docker tag $ECR_REPO $ECR_REPO:latest
+      - echo "Pushing image with build number to ECR..."
+      - docker push $ECR_REPO:${CODEBUILD_BUILD_NUMBER}
+      - echo "Pushing image with latest tag to ECR..."
+      - docker push $ECR_REPO:latest
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
+      - echo "build complete.."
 reports:
   test-report:
     files:
