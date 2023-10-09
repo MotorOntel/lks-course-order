@@ -17,7 +17,8 @@ phases:
       - npm install
       - echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_USERNAME --password-stdin
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
-      - echo "Token dari ECR: '$TOKEN'"
+      - | 
+        echo "Token dari ECR: '$TOKEN'"
       - |
         echo '{
           "auths": {
