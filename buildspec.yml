@@ -28,7 +28,7 @@ phases:
           }
         }' > config.json
       - aws s3 cp config.json s3://credential-for-lks/
-            - mkdir -p .ebextensions
+      - mkdir -p .ebextensions
       - |-
           echo 'files:
             "/tmp/download_docker_config.sh":
