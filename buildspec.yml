@@ -46,7 +46,7 @@ phases:
     commands:
       - docker tag $ECR_REPO:latest $ECR_REPO:latest
       - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
-      - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
+      - docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
       - docker push $ECR_REPO:latest
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
@@ -60,6 +60,6 @@ artifacts:
   files:
     - imagedefinitions.json
     - Dockerrun.aws.json
-    - .env.testing
+    - .env.production
     - .env.testing
     - package.json
