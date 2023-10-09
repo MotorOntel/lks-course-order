@@ -19,13 +19,13 @@ phases:
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
       - echo "Token dari ECR: '$TOKEN'"
       - |
-       echo '{
-        "auths": {
-          "'$ECR_REPO'": {
-            "auth": "'$TOKEN'"
+        echo '{
+          "auths": {
+            "'$ECR_REPO'": {
+              "auth": "'$TOKEN'"
+            }
           }
-        }
-       }' > config.json
+        }' > config.json
       - aws s3 cp config.json s3://credential-for-lks/
       - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
       # Update .env files using environment variables from CodePipeline
