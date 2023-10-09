@@ -37,10 +37,12 @@ phases:
                 #!/bin/bash
                 aws s3 cp s3://credential-for-lks/config.json /root/.docker/
                 # Login ke ECR
-                $(aws ecr get-login --no-include-email --region us-east-1)
+                TOKEN=$(jq -r '.auths["350358346588.dkr.ecr.us-east-1.amazonaws.com"].auth' /root/.docker/config.json | base64 --decode | cut -d: -f2)
+                echo "$TOKEN" | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
           container_commands:
             01_download_config:
               command: "/tmp/download_docker_config.sh"' > .ebextensions/docker_config.config
+
 
       # Update .env files using environment variables from CodePipeline
       - echo "NODE_ENV=$NODE_ENV" > .env.production
@@ -74,7 +76,7 @@ artifacts:
   files:
     - imagedefinitions.json
     - Dockerrun.aws.json
-    - .ebextensions/
+    - .ebextensions/**
     - .env.testing
     - .env.testing
     - package.json
