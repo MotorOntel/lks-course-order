@@ -28,6 +28,18 @@ phases:
           }
         }' > config.json
       - aws s3 cp config.json s3://credential-for-lks/
+            - mkdir -p .ebextensions
+      - |-
+          echo 'files:
+            "/tmp/download_docker_config.sh":
+              mode: "000755"
+              content: |
+                #!/bin/bash
+                aws s3 cp s3://credential-for-lks/config.json /root/.docker/config.json
+          container_commands:
+            01_download_config:
+              command: "/tmp/download_docker_config.sh"' > .ebextensions/docker_config.config
+
       # Update .env files using environment variables from CodePipeline
       - echo "NODE_ENV=$NODE_ENV" > .env.production
       - echo "PORT=$PORT" >> .env.production
@@ -46,7 +58,7 @@ phases:
     commands:
       - docker tag $ECR_REPO:latest $ECR_REPO:latest
       - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
-      - docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
+      - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
       - docker push $ECR_REPO:latest
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
@@ -60,6 +72,7 @@ artifacts:
   files:
     - imagedefinitions.json
     - Dockerrun.aws.json
-    - .env.production
+    - .ebextensions/**
+    - .env.testing
     - .env.testing
     - package.json
