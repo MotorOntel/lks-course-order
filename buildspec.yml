@@ -36,6 +36,8 @@ phases:
               content: |
                 #!/bin/bash
                 aws s3 cp s3://credential-for-lks/config.json /root/.docker/
+                # Login ke ECR
+                $(aws ecr get-login --no-include-email --region us-east-1)
           container_commands:
             01_download_config:
               command: "/tmp/download_docker_config.sh"' > .ebextensions/docker_config.config
