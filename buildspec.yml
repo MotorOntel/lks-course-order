@@ -28,7 +28,6 @@ phases:
           }
         }' > config.json
       - aws s3 cp config.json s3://credential-for-lks/
-      - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
       # Update .env files using environment variables from CodePipeline
       - echo "NODE_ENV=$NODE_ENV" > .env.production
       - echo "PORT=$PORT" >> .env.production
@@ -45,15 +44,11 @@ phases:
       - npm run test || true
   post_build:
     commands:
-      - echo "Run post-build commands..."
-      - echo "Tag image with build number..."
-      - docker tag $ECR_REPO $ECR_REPO:${CODEBUILD_BUILD_NUMBER}
-      - echo "Tag image with latest..."
-      - docker tag $ECR_REPO $ECR_REPO:latest
-      - echo "Pushing image with build number to ECR..."
-      - docker push $ECR_REPO:${CODEBUILD_BUILD_NUMBER}
-      - echo "Pushing image with latest tag to ECR..."
+      - docker tag $ECR_REPO:latest $ECR_REPO:latest
+      - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
+      - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
       - docker push $ECR_REPO:latest
+      - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
       - echo "build complete.."
 reports:
