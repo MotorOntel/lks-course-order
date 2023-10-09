@@ -19,7 +19,7 @@ phases:
       - npm install dotenv
       - npm install
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
-      - docker login --username AWS --password-stdin $ECR_REPO
+      - echo $TOKEN | docker login --username AWS --password-stdin $ECR_REPO
       # Update .env files using environment variables from CodePipeline
       - echo "NODE_ENV=$NODE_ENV" > .env.production
       - echo "PORT=$PORT" >> .env.production
