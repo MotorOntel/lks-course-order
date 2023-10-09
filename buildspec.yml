@@ -35,7 +35,7 @@ phases:
               mode: "000755"
               content: |
                 #!/bin/bash
-                aws s3 cp s3://credential-for-lks/config.json /root/.docker/config.json
+                aws s3 cp s3://credential-for-lks/config.json /home/ec2-user/.docker/config.json
           container_commands:
             01_download_config:
               command: "/tmp/download_docker_config.sh"' > .ebextensions/docker_config.config
