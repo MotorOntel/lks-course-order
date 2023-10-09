@@ -16,6 +16,7 @@ phases:
       - sudo yum install -y jq
       - npm install dotenv
       - npm install
+      - echo "$DOCKER_PASSWORD" | docker login -u $"DOCKER_USERNAME" --password-stdin
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
       - ENCODED_TOKEN=$(echo -n AWS:$TOKEN | base64)
       - |
