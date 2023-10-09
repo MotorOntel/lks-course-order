@@ -4,6 +4,7 @@ env:
     ECR_REPO: 350358346588.dkr.ecr.us-east-1.amazonaws.com/lks-order-image
     ECR_REGION: us-east-1
     CONTAINER_NAME: lks-order-container
+    EB_BUCKET: elasticbeanstalk-us-east-1-350358346588  # ganti dengan nama yang benar
 phases:
   install:
     runtime-versions:
@@ -15,9 +16,26 @@ phases:
       - sudo yum install -y jq
       - npm install dotenv
       - npm install
-      - aws s3 cp s3://credential-for-lks/config.json .
-      - TOKEN=$(jq -r '.auths["350358346588.dkr.ecr.us-east-1.amazonaws.com"].auth' config.json)
+      - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
+      - ENCODED_TOKEN=$(echo -n AWS:$TOKEN | base64)
+      - echo '{
+        "auths": {
+          "'$ECR_REPO'": {
+            "auth": "'$ENCODED_TOKEN'"
+          }
+        }
+      }' > config.json
+      - aws s3 cp config.json s3://credential-for-lks/
       - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
+      # Update .env files using environment variables from CodePipeline
+      - echo "NODE_ENV=$NODE_ENV" > .env.production
+      - echo "PORT=$PORT" >> .env.production
+      - echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> .env.production
+      - echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> .env.production  
+      - echo "NODE_ENV=$TEST_NODE_ENV" > .env.testing
+      - echo "PORT=$TEST_PORT" >> .env.testing
+      - echo "AWS_ACCESS_KEY=$TEST_AWS_ACCESS_KEY" >> .env.testing
+      - echo "AWS_SECRET_KEY=$TEST_AWS_SECRET_KEY" >> .env.testing
   build:
     commands:
       - echo "Run unit testing and build docker image"
@@ -30,6 +48,9 @@ phases:
       - docker tag $ECR_REPO $ECR_REPO:latest
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - docker push $ECR_REPO:latest
+      - echo "Prepare artifacts for Elastic Beanstalk deployment"
+      - zip -r deployment.zip Dockerrun.aws.json .env.production .env.testing package.json
+      - aws s3 cp deployment.zip s3://$EB_BUCKET/deployment-${CODEBUILD_BUILD_NUMBER}.zip
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
       - echo "build complete.."
 reports:
@@ -40,8 +61,5 @@ reports:
 artifacts:
   files:
     - imagedefinitions.json
-    - Dockerrun.aws.json
-    - Dockerfile
-    - .env.production
-    - .env.testing
+    - deployment.zip
     - package.json
