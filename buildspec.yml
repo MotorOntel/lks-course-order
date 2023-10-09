@@ -46,7 +46,7 @@ phases:
   post_build:
     commands:
       - echo "push the image to ECR.."
-      - docker tag $ECR_REPO:latest $ECR_REPO:latest
+      - docker tag $ECR_REPO $ECR_REPO:latest
       - docker tag $ECR_REPO:latest $ECR_REPO:${CODEBUILD_BUILD_NUMBER}
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - docker push $ECR_REPO:latest
