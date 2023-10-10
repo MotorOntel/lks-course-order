@@ -57,13 +57,13 @@ phases:
       - npm run test || true
       - echo "Build docker image"
       - docker build -t $ECR_REPO .
-      - docker tag $ECR_REPO $ECR_REPO:latest
-      - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
+      - docker tag $ECR_REPO $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
+      - docker tag $ECR_REPO $ECR_REPO:latest 
   post_build:
     commands:
       - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
+      - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}      
       - docker push $ECR_REPO:latest
-      - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
       - echo "build complete.."
 reports:
