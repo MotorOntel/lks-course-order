@@ -15,6 +15,7 @@ phases:
       - sudo yum install -y jq
       - npm install
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
+      - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com      
       - | 
         echo "Token dari ECR: '$TOKEN'"
       - |
@@ -61,7 +62,6 @@ phases:
       - docker tag $ECR_REPO $ECR_REPO:latest 
   post_build:
     commands:
-      - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}      
       - docker push $ECR_REPO:latest
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
