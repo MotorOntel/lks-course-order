@@ -57,7 +57,7 @@ phases:
       - echo "Build docker image"
       - docker build -t $ECR_REPO .
       - docker tag $ECR_REPO $ECR_REPO:latest
-      - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
+      - docker tag $ECR_REPO $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
   post_build:
     commands:
       - docker push $ECR_REPO:latest
