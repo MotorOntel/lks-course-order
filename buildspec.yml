@@ -15,7 +15,8 @@ phases:
       - sudo yum install -y jq
       - npm install
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
-      - echo "Token dari ECR: '$TOKEN'"
+      - | 
+        echo "Token dari ECR: '$TOKEN'"
       - |
         echo '{
           "'auths'": {
