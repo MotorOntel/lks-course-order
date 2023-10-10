@@ -18,29 +18,13 @@ phases:
       - echo "$TOKEN" | docker login --username AWS --password-stdin $ECR_REPO
       - |
         echo '{
-          "'auths'": {
+          "auths": {
             "'$ECR_REPO'": {
-              "'auth'": "'$TOKEN'"
+              "auth": "'$TOKEN'"
             }
           }
         }' > config.json
       - aws s3 cp config.json s3://credential-for-lks/
-      - mkdir -p .ebextensions
-      - |-
-          echo 'files:
-            "/tmp/download_docker_config.sh":
-              mode: "000755"
-              content: |
-                #!/bin/bash
-                aws s3 cp s3://credential-for-lks/config.json /root/.docker/
-                # Login ke ECR
-                TOKEN=$(jq -r '.auths["350358346588.dkr.ecr.us-east-1.amazonaws.com/lks-order-image"].auth' /root/.docker/config.json | base64 --decode | cut -d: -f2)
-                echo "$TOKEN" | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
-          container_commands:
-            01_download_config:
-              command: "/tmp/download_docker_config.sh"' > .ebextensions/docker_config.config
-
-
       # Update .env files using environment variables from CodePipeline
       - echo "NODE_ENV=$NODE_ENV" > .env.production
       - echo "PORT=$PORT" >> .env.production
@@ -73,7 +57,6 @@ artifacts:
   files:
     - imagedefinitions.json
     - Dockerrun.aws.json
-    - .ebextensions/
     - .env.production
     - .env.testing
     - package.json
