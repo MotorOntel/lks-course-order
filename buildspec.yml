@@ -13,17 +13,14 @@ phases:
     commands:
       - echo "Install Dependencies and login into ECR"
       - sudo yum install -y jq
-      - npm install dotenv
       - npm install
-      - echo "$DOCKER_PASSWORD" | docker login -u $DOCKER_USERNAME --password-stdin
       - TOKEN=$(aws ecr get-login-password --region $ECR_REGION)
-      - | 
-        echo "Token dari ECR: '$TOKEN'"
+      - echo "Token dari ECR: '$TOKEN'"
       - |
         echo '{
-          "auths": {
+          "'auths'": {
             "'$ECR_REPO'": {
-              "auth": "'$TOKEN'"
+              "'auth'": "'$TOKEN'"
             }
           }
         }' > config.json
@@ -55,13 +52,13 @@ phases:
       - echo "AWS_SECRET_KEY=$TEST_AWS_SECRET_KEY" >> .env.testing
   build:
     commands:
-      - echo "Run unit testing and build docker image"
-      - docker build -t $ECR_REPO .
-      - npm run test || true
+      - echo "Run unit testing"
+      - npm run test
+      - echo "Build docker image"
+      - docker build -t $ECR_REPO:latest .
+      - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
   post_build:
     commands:
-      - docker tag $ECR_REPO:latest $ECR_REPO:latest
-      - docker tag $ECR_REPO:latest $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
       - echo $TOKEN | docker login --username AWS --password-stdin 350358346588.dkr.ecr.us-east-1.amazonaws.com
       - docker push $ECR_REPO:latest
       - docker push $ECR_REPO:v${CODEBUILD_BUILD_NUMBER}
